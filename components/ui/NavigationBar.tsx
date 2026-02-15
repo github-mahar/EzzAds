@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Zap, BarChart3, Archive, Settings, Cpu, LogIn, Menu, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
+import { getUsageStats } from '@/lib/db';
 import type { User } from '@supabase/supabase-js';
 
 const NAV_ITEMS = [
@@ -27,14 +28,22 @@ export default function NavigationBar() {
     const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const generationsLeft = 5; // Will connect to usage tracking
+    const [generationsLeft, setGenerationsLeft] = useState(5);
 
     useEffect(() => {
         const supabase = createClient();
 
         // Get initial session
-        supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+        supabase.auth.getUser().then(async ({ data: { user: currentUser } }) => {
             setUser(currentUser);
+            if (currentUser) {
+                const usage = await getUsageStats();
+                if (usage && usage.limit !== -1) {
+                    setGenerationsLeft(usage.limit - usage.usedToday);
+                } else if (usage) {
+                    setGenerationsLeft(-1); // unlimited
+                }
+            }
         });
 
         // Listen for auth changes
@@ -57,7 +66,7 @@ export default function NavigationBar() {
                 <div
                     className="h-full transition-all duration-300"
                     style={{
-                        width: `${((5 - generationsLeft) / 5) * 100}%`,
+                        width: generationsLeft === -1 ? '0%' : `${((5 - generationsLeft) / 5) * 100}%`,
                         background: 'var(--color-accent-blue)',
                     }}
                 />
@@ -129,7 +138,7 @@ export default function NavigationBar() {
                             className="text-xs font-bold"
                             style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent-blue)' }}
                         >
-                            {generationsLeft}
+                            {generationsLeft === -1 ? '∞' : generationsLeft}
                         </span>
                     </div>
 
