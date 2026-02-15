@@ -107,7 +107,12 @@ body::before {
    TYPOGRAPHY SYSTEM (§4)
    ============================================ */
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -115,10 +120,21 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-text-primary);
 }
 
-h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
-h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
-h3 { font-size: clamp(1.125rem, 2.5vw, 1.75rem); }
-h4 { font-size: 1.25rem; }
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+}
+
+h3 {
+  font-size: clamp(1.125rem, 2.5vw, 1.75rem);
+}
+
+h4 {
+  font-size: 1.25rem;
+}
 
 /* Monospace Intelligence Labels */
 .mono-label {
@@ -292,33 +308,69 @@ h4 { font-size: 1.25rem; }
 
 /* System Boot — fast fade in */
 @keyframes system-boot {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Pulse glow for status indicators */
 @keyframes pulse-glow {
-  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--color-accent-success); }
-  50% { opacity: 0.6; box-shadow: 0 0 8px var(--color-accent-success); }
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 4px var(--color-accent-success);
+  }
+
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 8px var(--color-accent-success);
+  }
 }
 
 /* Processing scanner sweep */
 @keyframes scanner-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Data stream text reveal */
 @keyframes data-stream {
-  0% { opacity: 0; transform: translateX(-4px); }
-  100% { opacity: 1; transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* System flash for click feedback */
 @keyframes system-flash {
-  0% { opacity: 0; }
-  50% { opacity: 0.1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 .animate-boot {
@@ -412,4 +464,119 @@ a {
 .border-glow {
   border-color: rgba(37, 99, 235, 0.3);
   box-shadow: 0 0 8px var(--color-accent-glow);
+}
+
+/* ============================================
+   ACCESSIBILITY (Focus States)
+   ============================================ */
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent-blue);
+  outline-offset: 2px;
+}
+
+.btn-signal:focus-visible,
+.btn-void:focus-visible {
+  outline: 2px solid var(--color-accent-blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-accent-glow);
+}
+
+.input-void:focus-visible {
+  outline: none;
+  /* already has custom focus style */
+}
+
+/* ============================================
+   MOBILE RESPONSIVENESS
+   ============================================ */
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: clamp(1.75rem, 7vw, 2.5rem);
+  }
+
+  h2 {
+    font-size: clamp(1.25rem, 5vw, 2rem);
+  }
+
+  .btn-signal,
+  .btn-void {
+    padding: 10px 16px;
+    font-size: 0.75rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .card-void {
+    border-radius: var(--radius-sharp);
+  }
+
+  /* Ensure touch targets are 44px minimum */
+  .toggle-segment {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Stack metric bars vertically */
+  .mono-label {
+    font-size: 0.6875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+
+  .btn-signal,
+  .btn-void {
+    padding: 12px 16px;
+  }
+}
+
+/* ============================================
+   LINE CLAMP UTILITY
+   ============================================ */
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============================================
+   SMOOTH PAGE TRANSITIONS
+   ============================================ */
+
+main>* {
+  animation: system-boot 180ms ease-out;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .processing-bar::after {
+    animation: none;
+  }
+
+  .status-pulse {
+    animation: none;
+  }
 }
