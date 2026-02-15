@@ -1,35 +1,23 @@
-You are implementing a production-grade portfolio system called “The Cyber-Terminal.”
+You are implementing "The EzzAds Generator" - A Military-Grade AI Ad Creation Platform.
 
 Before doing anything:
 
-1. Read SYSTEM.md.
-2. Confirm you understand that it overrides all other documents.
-3. Then read:
-   - PRD.md
-   - design.md
-   - techstack.md
-   - todo.md
-   - architecture-lock.md
-   - performance-budget.md
-   - animation-manifest.md
-   - quality-control.md
-   - design-enforcement.md
+1. Read `SYSTEM.md` (Master Control).
+2. Read `PRD.md` (Functional Req).
+3. Read `design.md` (Visual Req).
+4. Read `techstack.md` (Technical Req).
+5. Read `todo.md` (Roadmap).
 
 Execution Rules:
+- You must NOT start coding until you understand the "Dark-Intelligence" aesthetic.
+- You must NOT use generic Tailwind components.
+- You must NOT improvise the folder structure; follow `architecture-lock.md`.
+- You must self-audit using `quality-control.md`.
 
-- You may not start coding immediately.
-- You must follow TODO.md Phase 1 and conduct the structured interview.
-- You must not invent placeholder content.
-- You must not simplify the aesthetic.
-- You must not introduce new dependencies.
-- You must not convert multi-page into single-page.
-- You must self-audit using quality-control.md before marking complete.
+If any rule conflicts, `SYSTEM.md` overrides.
 
-If any rule conflicts, SYSTEM.md overrides.
+Status:
+- Phase 0: Analysis (Complete)
+- Phase 1: Implementation (Ready to start)
 
-After reading all documents:
-1. Confirm readiness.
-2. Begin Phase 1 Interview only.
-3. Wait for user responses.
-
-Do not generate code yet.
+Do not generate code until strictly instructed.
