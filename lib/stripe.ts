@@ -4,11 +4,20 @@
 // Per techstack.md §6: Stripe handles subscriptions.
 // Flow: Stripe Checkout → Webhook → Update user plan in database.
 
-// Note: Stripe SDK will be installed when payment flow is activated.
-// The secret key is stored in .env.local as STRIPE_SECRET_KEY (server-side only).
-// The publishable key is stored as NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (client-side safe).
+import Stripe from 'stripe';
+
+// Server-side Stripe instance
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2025-01-27.acacia',
+    typescript: true,
+});
 
 export const STRIPE_STATUS = process.env.STRIPE_SECRET_KEY ? 'CONFIGURED' : 'PENDING_CONFIGURATION' as const;
+
+// Price ID for the Operator tier — set this after creating in Stripe Dashboard
+// You can create products via: Stripe Dashboard → Products → Add Product
+// Or let the checkout API auto-create one below
+export const STRIPE_PRICE_ID = process.env.STRIPE_OPERATOR_PRICE_ID || null;
 
 export const PLANS = {
     FREE: {

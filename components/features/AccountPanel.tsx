@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { User, Zap, ArrowRight, LogOut, Shield } from 'lucide-react';
+import { User, Zap, ArrowRight, LogOut, Shield, CreditCard, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
 import { getUsageStats, getProfile } from '@/lib/db';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -11,6 +11,8 @@ import type { Profile } from '@/lib/db';
 
 export default function AccountPanel() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const upgradeSuccess = searchParams.get('upgrade') === 'success';
     const [user, setUser] = useState<SupabaseUser | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
@@ -78,6 +80,27 @@ export default function AccountPanel() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-boot-delay-1">
+            {/* Upgrade Success Banner */}
+            {upgradeSuccess && (
+                <div
+                    className="lg:col-span-12 p-4 flex items-center gap-3 animate-boot"
+                    style={{
+                        background: 'rgba(16, 185, 129, 0.06)',
+                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                        borderRadius: 'var(--radius-default)',
+                    }}
+                >
+                    <CheckCircle size={16} style={{ color: 'var(--color-accent-success)', flexShrink: 0 }} />
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-xs font-semibold" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent-success)' }}>
+                            [UPGRADE_COMPLETE]
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                            Welcome to the Operator Tier. All capabilities unlocked. Unlimited generations active.
+                        </span>
+                    </div>
+                </div>
+            )}
             {/* Main Content */}
             <div className="lg:col-span-8 flex flex-col gap-6">
                 {/* Profile Card */}
@@ -227,12 +250,27 @@ export default function AccountPanel() {
                         </div>
                         <Shield size={24} style={{ color: planType === 'PRO' ? 'var(--color-accent-blue)' : 'var(--color-text-muted)' }} />
                     </div>
-                    {planType !== 'PRO' && (
+                    {planType !== 'PRO' ? (
                         <Link href="/pricing" className="btn-signal w-full justify-center">
                             <Zap size={14} />
                             UPGRADE_TIER
                             <ArrowRight size={14} />
                         </Link>
+                    ) : (
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const res = await fetch('/api/checkout', { method: 'POST' });
+                                    const data = await res.json();
+                                    if (data.url) window.location.href = data.url;
+                                } catch { /* silently fail */ }
+                            }}
+                            className="btn-void w-full justify-center"
+                            style={{ color: 'var(--color-accent-blue)', borderColor: 'rgba(37, 99, 235, 0.2)' }}
+                        >
+                            <CreditCard size={14} />
+                            MANAGE_SUBSCRIPTION
+                        </button>
                     )}
                 </div>
 
