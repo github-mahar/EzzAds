@@ -6,70 +6,64 @@
 
 # 1. STRUCTURE CHECK
 
-[ ] Multi-page architecture implemented  
-[ ] App Router used  
-[ ] No Pages Router fallback  
-[ ] Folder structure matches techstack.md  
+[ ] Multi-page architecture implemented (/generate, /dashboard, etc.)
+[ ] App Router used
+[ ] No Pages Router fallback
+[ ] Folder structure matches `architecture-lock.md`
 
 ---
 
-# 2. DESIGN CHECK
+# 2. DESIGN CHECK ("DARK-INTELLIGENCE")
 
-[ ] Background grid visible but subtle  
-[ ] Accent color usage controlled  
-[ ] No pastel colors  
-[ ] No generic hero layout  
-[ ] Terminal cards implemented correctly  
-[ ] Traffic light window controls present  
-[ ] 1px borders preserved  
-[ ] Sharp corners used  
+[ ] Background is Deep Obsidian (`#020408`)
+[ ] Primary Accent is Neon Blue (`#2563EB`)
+[ ] **Logic Grid** background is visible but subtle (opacity < 6%)
+[ ] No rounded corners > 6px
+[ ] No drop shadows (use 1px borders + glows)
+[ ] Typography: Headings are tight-tracked; Data is Monospace.
 
 ---
 
-# 3. TYPOGRAPHY CHECK
+# 3. FUNCTIONALITY CHECK
 
-[ ] Headings in ALL CAPS where required  
-[ ] Monospace used only for metadata  
-[ ] No default browser fonts  
-[ ] Letter spacing adjusted for headings  
+[ ] Generator Form uses "Segmented Toggles", NOT native dropdowns.
+[ ] "Processing" state has a dedicated animation (not just a spinner).
+[ ] Output is structured (Headlines, Hooks, Body, CTA) - not a solid block of text.
+[ ] Auth protection working on /dashboard and /account.
 
 ---
 
-# 4. MOTION CHECK
+# 4. INTELLECTUAL PROPERTY CHECK
 
-[ ] Staggered reveal implemented  
-[ ] No excessive animation  
-[ ] No bounce  
-[ ] No floating loop effects  
-[ ] Pulse indicator subtle  
+[ ] No "Lorem Ipsum"
+[ ] No "Generic SaaS" copy
+[ ] Copy feels like a "Military-Grade Marketing Tool"
 
 ---
 
 # 5. STACK CHECK
 
-[ ] TypeScript strict mode  
-[ ] No `any` types  
-[ ] No UI libraries  
-[ ] No unused dependencies  
-[ ] Cloudflare compatible  
+[ ] TypeScript strict mode (no `any`)
+[ ] Supabase client initialized correctly
+[ ] OpenAI API keys protected (Server-side)
+[ ] Stripe Webhooks configured
 
 ---
 
 # 6. GENERICITY CHECK
 
-If you remove colors and text,
-does the layout still feel unique?
+If you remove the logo:
+**Does this look like a Bootstrap template?**
 
-If no → redesign.
-
-If yes → pass.
+If YES → **FAIL**. Redisgn immediately.
+If NO (it looks like a sci-fi terminal) → **PASS**.
 
 ---
 
 # 7. FINAL VERDICT
 
 You must explicitly state:
-“Quality control passed.”
+“Quality control passed: EzzAds System Green.”
 
 If not, fix issues first.
 

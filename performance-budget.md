@@ -1,55 +1,48 @@
 # performance-budget.md
-## Performance Constraints
+## Performance Constraints: EzzAds
 
 ---
 
 # 1. JS BUDGET
 
-Goal:
-Minimal client-side JS.
+**Goal**: Zero-Bloat.
 
 Rules:
-- Do not convert entire pages to client components.
-- Use dynamic import only if necessary.
-- Avoid heavy libraries.
-
-Framer Motion must be limited to:
-- Page transitions
-- Controlled stagger
+- **Server Components** for all non-interactive UI.
+- **Lazy Load** the Ad Result components if heavy.
+- **Lucide React** for icons (tree-shakeable).
+- No heavy charting libraries unless necessary for Analytics.
 
 ---
 
 # 2. FONT BUDGET
 
-- Maximum 2 font families.
-- Use next/font optimization.
-- No runtime font loading.
+- **Inter / Geist / SF Pro** (Variable font preferred).
+- **JetBrains Mono** or **Geist Mono** for data.
+- Self-host or use `next/font`. No Google Fonts CDN at runtime.
 
 ---
 
 # 3. ANIMATION BUDGET
 
-Max animated elements on load:
-< 10
-
-No continuous background animations.
-
-No GPU-heavy blur effects.
+- CSS Transitions > JS Animations.
+- If using `framer-motion`, bundle size must be monitored.
+- Prefer `transform` and `opacity` changes only (GPU accelerated).
 
 ---
 
-# 4. CSS BUDGET
+# 4. WEB VITALS TARGETS
 
-- No massive global CSS.
-- Use Tailwind utilities.
-- Avoid deep nesting.
+- **LCP**: < 1.2s (Critical for "Institute Speed" feel).
+- **CLS**: 0 (Layout must be rigid).
+- **FID**: < 100ms.
 
 ---
 
-# 5. LOAD TARGET
+# 5. IMAGE STRATEGY
 
-First contentful paint must be fast.
-No blocking scripts.
+- Use SVGs for UI elements (Icons, Grid).
+- Optimize any user-facing images automatically (`next/image`).
 
 ---
 

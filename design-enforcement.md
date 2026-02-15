@@ -1,101 +1,88 @@
 # design-enforcement.md
-## Anti-AI Slop Enforcement
+## Anti-Generic Design Enforcement
+## Theme: "The Void" (Dark-Intelligence)
 
 ---
 
 # 1. LAYOUT ENFORCEMENT
 
 Homepage must NOT:
-
-- Be a centered card
-- Use full-width hero with large paragraph and CTA
-- Look like a SaaS landing page
-- Be symmetrical in a predictable 3-column grid
+- Be a centered "Hero + Illustration" card.
+- Look like a friendly startup landing page.
+- Use "Wavy" or "Blob" background dividers.
 
 Instead:
-
-- Use asymmetric layout where appropriate
-- Use system framing elements
-- Make navigation feel embedded in OS
+- **Asymmetric Grid** layouts.
+- **HUD-style** overlays.
+- Navigation that feels like a **Cockpit Control Bar**.
 
 ---
 
 # 2. SPACING ENFORCEMENT
 
-Do NOT use excessive whitespace.
+Do NOT use excessive, "airy" whitespace.
+Spacing must feel **tight, calculated, and information-dense**.
 
-Spacing must feel intentional and structured.
-
-Prefer:
-- 8px / 12px / 16px / 24px system
-Avoid:
-- Random large gaps
+- Use `gap-2` or `gap-4` for data grids.
+- Margins should be rigid.
 
 ---
 
-# 3. COLOR ENFORCEMENT
+# 3. COLOR ENFORCEMENT (STRICT)
 
-Accent color must feel:
+**The Void**: `#020408` (Background)
+**The Signal**: `#2563EB` (Action)
 
-Sharp.
-High contrast.
-Purposeful.
+**BANNED COLORS**:
+- Friendly Orange
+- Soft Purple
+- Pastel Green/Pink
+- "Bootstrap Primary Blue" (unless modified to Neon)
 
-If accent appears everywhere → reduce it.
-
-Magenta must never overpower cyan.
-
----
-
-# 4. CARD ENFORCEMENT
-
-TerminalCard must:
-
-- Have window controls
-- Have thin border
-- Have metadata section
-- Have hover border transition
-
-If card looks like generic Tailwind card → redesign.
+If the UI feels "warm", it fails. It must feel **Cold and precise**.
 
 ---
 
-# 5. NAVIGATION ENFORCEMENT
+# 4. COMPONENT ENFORCEMENT
 
-Navigation must feel like system bar.
+**Buttons**:
+- Sharp corners (max 4px).
+- Function over form.
+- Hover states must be "Instant" or "Glitch", not "Soft Fade".
 
-Include:
-SYSTEM_STATUS indicator.
+**Inputs**:
+- Dark backgrounds.
+- 1px Borders.
+- Monospace input text.
 
-If nav looks like:
-Logo + 4 links + CTA button
-→ It fails.
+**Cards**:
+- No shadows.
+- 1px Borders with low opacity (`border-slate-800`).
+- Optional: Corner brackets `[ ]` for decoration.
 
 ---
 
-# 6. ATMOSPHERE ENFORCEMENT
+# 5. ATMOSPHERE ENFORCEMENT
 
 The site must feel:
-
-Operational.
-Running.
-Alive.
+- **Operational**
+- **Calculated**
+- **High-Stakes**
 
 Not:
-Friendly.
-Corporate.
-Playful.
-Startup-like.
+- Friendly
+- Casual
+- "Welcome to our app"
 
 ---
 
-# 7. UNIQUENESS TEST
+# 6. UNIQUENESS TEST
 
 Ask internally:
+"Would a high-frequency trader or a cyber-security analyst feel at home here?"
 
-“Would this look at home in a futuristic dev OS?”
-
-If not → redesign.
+If yes → Pass.
+If no → Redesign.
 
 ---
 

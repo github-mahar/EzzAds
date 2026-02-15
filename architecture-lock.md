@@ -1,34 +1,41 @@
 # architecture-lock.md
 ## Structural Enforcement Layer
-## Applies to: GPT-5 and Claude Code
+## Applies to: EzzAds Implementation Agent
 
 ---
 
 # 1. FOLDER STRUCTURE IS IMMUTABLE
 
-The following structure must be preserved:
+The following structure must be preserved (as per Techstack.md):
 
 /app
-  /system-info
-  /project-archive
-  /execution-pipeline
-  /initialize-connection
+  /generate      (Ad Generator)
+  /result        (Output Display)
+  /dashboard     (Saved Ads)
+  /pricing       (Monetization)
+  /account       (User Profile)
+  /api           (Next.js API Routes)
   layout.tsx
-  page.tsx
+  page.tsx       (Home)
 
 /components
+  /ui            (Shared "Void" components)
+  /features      (Feature-specific components)
 /lib
-/styles
+  supabase.ts
+  openai.ts
+  stripe.ts
+  utils.ts
+/types
 /public
 
 You may ADD files inside these folders.
 
 You may NOT:
 - Rename root folders
-- Convert to single-page architecture
+- Convert to single-page architecture (SPA)
 - Move routing logic outside App Router
-- Introduce monorepo structure
-- Add backend folders
+- Introduce monorepo structure without approval
 
 ---
 
@@ -36,32 +43,27 @@ You may NOT:
 
 Must prioritize:
 
-- Server Components by default
-- Client Components only when required
-- No full client-side app conversion
-- No unnecessary state management libraries
+- **Server Components (RSC)** by default
+- **Client Components** only when interaction is required (Forms, Toggles, Buttons)
+- **No full client-side app conversion**
 
 Do not introduce:
-- Redux
-- Zustand
-- Context unless absolutely required
+- Redux / MobX
+- Zustand (unless local state becomes unmanageable)
+- Heavy UI libraries (Mantine, Chakra, Material UI) -> **Use strict Tailwind**
 
 ---
 
 # 3. DATA FLOW LOCK
 
-All content must originate from:
-
-/lib/data.ts
+- **Supabase** is the single source of truth for user data.
+- **OpenAI** interactions must happen **Server-Side ONLY**.
+- **Stripe** handles all payments via webhooks.
 
 No:
-- External APIs
-- CMS
-- Dynamic runtime fetching
-- Edge database calls
-
-If future scalability is needed,
-architect in a way that does not break static deployment.
+- Client-side API keys exposed
+- Mock data in production
+- Hardcoded content arrays (except for static UI labels)
 
 ---
 
@@ -69,12 +71,8 @@ architect in a way that does not break static deployment.
 
 Do NOT over-abstract.
 
-If a component is used only once,
-do not extract it unnecessarily.
-
-Avoid:
-- Premature optimization
-- Hyper-generic reusable component systems
+If a component is used only once, keep it local or inline.
+Avoid "Atomic Design" unless it simplifies the specific "Void" system.
 
 ---
 

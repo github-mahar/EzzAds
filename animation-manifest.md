@@ -1,64 +1,56 @@
 # animation-manifest.md
-## Motion Ruleset
+## Motion Ruleset: EzzAds System
 
 ---
 
 # 1. PAGE LOAD ANIMATION
 
-Allowed:
-- Opacity fade-in
-- translateY (10–20px)
-- Staggered delay 80–120ms
+**Style**: "System Boot"
+- **Text Reveal**: Fast scrambling or typewriter effect for headers.
+- **Opacity**: Quick fade-in (0 -> 1 in 200ms).
+- **Stagger**: Rapid succession.
 
-Duration:
-< 800ms total
+**Avoid**:
+- Slow, dreamy fades ( > 800ms).
+- Bounce/Spring effects.
 
 ---
 
 # 2. HOVER ANIMATION
 
-Allowed:
-- Border color transition
-- Glow increase
-- Slight scale (max 1.02)
-
-Not allowed:
-- Bounce
-- Spin
-- Elastic motion
-- Infinite floating
+**Style**: "Tactile Feedback"
+- **Border**: Instant color switch (Slate -> Blue).
+- **Glow**: Subtle bloom effect.
+- **Scale**: NONE. Do not scale buttons on hover.
 
 ---
 
-# 3. STATUS INDICATOR
+# 3. PROCESSING STATE (CRITICAL)
 
-Pulse:
-- Scale subtle
-- 2–3s cycle
-- No harsh glow spikes
+When the AI is generating:
+- **Progress Bar**: Linear, scanning motion.
+- **Text**: "Analyzing...", "Drafting...", "Optimizing..." cycling rapidly.
+- **Visuals**: A "Radar" or "Scanner" sweep effect.
+
+**Banned**:
+- Standard rotating circle spinner.
 
 ---
 
-# 4. TRANSITIONS BETWEEN PAGES
+# 4. TRANSITIONS
 
-If implemented:
-- Must be subtle fade
-- Not dramatic slide
-- No cinematic effects
+- **Instant** or **Fast Cut** prefered.
+- If animating route changes, keep it < 150ms.
 
 ---
 
 # 5. MOTION PHILOSOPHY
 
 Motion should feel:
-System-level.
-Intentional.
-Mechanical.
+**Electronic. Instant. Glitch-free.**
 
 Not:
-Playful.
-Cartoonish.
-Over-produced.
+Organic. Fluid. Bouncy.
 
 ---
 
