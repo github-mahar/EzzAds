@@ -1,26 +1,415 @@
 @import "tailwindcss";
 
+/* ============================================
+   THE EZZADS GENERATOR — VOID & SIGNAL SYSTEM
+   ============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* 3.1 Base Colors (The Void) */
+  --color-bg-primary: #020408;
+  --color-bg-secondary: #0B0E14;
+  --color-bg-tertiary: #0F1318;
+  --color-border-subtle: #1E293B;
+  --color-border-hover: #2563EB;
+
+  /* 3.2 Accent Colors (The Signal) */
+  --color-accent-blue: #2563EB;
+  --color-accent-glow: #3B82F64D;
+  --color-accent-success: #10B981;
+  --color-accent-danger: #EF4444;
+  --color-accent-warning: #F59E0B;
+
+  /* 3.3 Text Colors */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #64748B;
+  --color-text-accent: #2563EB;
+
+  /* Typography */
+  --font-display: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), 'JetBrains Mono', monospace;
+
+  /* Spacing (Tight, calculated) */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Borders */
+  --radius-sharp: 2px;
+  --radius-default: 4px;
+  --radius-max: 6px;
 }
 
+/* Tailwind v4 theme inline */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-void: var(--color-bg-primary);
+  --color-void-elevated: var(--color-bg-secondary);
+  --color-void-surface: var(--color-bg-tertiary);
+  --color-signal: var(--color-accent-blue);
+  --color-signal-glow: var(--color-accent-glow);
+  --color-signal-success: var(--color-accent-success);
+  --color-signal-danger: var(--color-accent-danger);
+  --color-signal-warning: var(--color-accent-warning);
+  --color-steel: var(--color-border-subtle);
+  --color-text-sharp: var(--color-text-primary);
+  --color-text-dim: var(--color-text-secondary);
+  --color-text-slate: var(--color-text-muted);
+  --color-text-signal: var(--color-text-accent);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================
+   GLOBAL RESET & BASE
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   THE LOGIC GRID (Background System §5.1)
+   ============================================ */
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ============================================
+   TYPOGRAPHY SYSTEM (§4)
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--color-text-primary);
+}
+
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
+h3 { font-size: clamp(1.125rem, 2.5vw, 1.75rem); }
+h4 { font-size: 1.25rem; }
+
+/* Monospace Intelligence Labels */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.mono-data {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.mono-header {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent-blue);
+}
+
+/* ============================================
+   COMPONENT BASE STYLES
+   ============================================ */
+
+/* Signal Button (Primary CTA) */
+.btn-signal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--color-accent-blue);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-accent-blue);
+  border-radius: var(--radius-sharp);
+  cursor: pointer;
+  transition: box-shadow 100ms ease, background 100ms ease;
+  position: relative;
+}
+
+.btn-signal:hover {
+  box-shadow: 0 0 20px var(--color-accent-glow), 0 0 40px rgba(37, 99, 235, 0.15);
+}
+
+.btn-signal:active {
+  background: #1D4ED8;
+}
+
+.btn-signal:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Void Button (Secondary) */
+.btn-void {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sharp);
+  cursor: pointer;
+  transition: border-color 100ms ease, color 100ms ease;
+}
+
+.btn-void:hover {
+  border-color: var(--color-accent-blue);
+  color: var(--color-accent-blue);
+}
+
+/* Void Card */
+.card-void {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-default);
+  position: relative;
+}
+
+.card-void:hover {
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+/* Input Fields */
+.input-void {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sharp);
+  outline: none;
+  transition: border-color 100ms ease;
+}
+
+.input-void:focus {
+  border-color: var(--color-accent-blue);
+  box-shadow: 0 0 0 1px var(--color-accent-glow);
+}
+
+.input-void::placeholder {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Segmented Toggle */
+.toggle-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sharp);
+  cursor: pointer;
+  transition: all 100ms ease;
+  user-select: none;
+}
+
+.toggle-segment:hover {
+  border-color: rgba(37, 99, 235, 0.4);
+  color: var(--color-text-secondary);
+}
+
+.toggle-segment.active {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: var(--color-accent-blue);
+  color: var(--color-accent-blue);
+  box-shadow: 0 0 12px var(--color-accent-glow);
+}
+
+/* ============================================
+   STATUS INDICATOR
+   ============================================ */
+
+.status-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent-success);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS (animation-manifest.md)
+   ============================================ */
+
+/* System Boot — fast fade in */
+@keyframes system-boot {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse glow for status indicators */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--color-accent-success); }
+  50% { opacity: 0.6; box-shadow: 0 0 8px var(--color-accent-success); }
+}
+
+/* Processing scanner sweep */
+@keyframes scanner-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Data stream text reveal */
+@keyframes data-stream {
+  0% { opacity: 0; transform: translateX(-4px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* System flash for click feedback */
+@keyframes system-flash {
+  0% { opacity: 0; }
+  50% { opacity: 0.1; }
+  100% { opacity: 0; }
+}
+
+.animate-boot {
+  animation: system-boot 200ms ease-out forwards;
+}
+
+.animate-boot-delay-1 {
+  animation: system-boot 200ms ease-out 50ms forwards;
+  opacity: 0;
+}
+
+.animate-boot-delay-2 {
+  animation: system-boot 200ms ease-out 100ms forwards;
+  opacity: 0;
+}
+
+.animate-boot-delay-3 {
+  animation: system-boot 200ms ease-out 150ms forwards;
+  opacity: 0;
+}
+
+/* Processing bar */
+.processing-bar {
+  position: relative;
+  height: 2px;
+  background: var(--color-border-subtle);
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+.processing-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--color-accent-blue), transparent);
+  animation: scanner-sweep 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-subtle);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ============================================
+   LINK & SELECTION
+   ============================================ */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.3);
+  color: var(--color-text-primary);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-gradient-signal {
+  background: linear-gradient(135deg, #2563EB, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-signal {
+  box-shadow: 0 0 20px var(--color-accent-glow), 0 0 40px rgba(37, 99, 235, 0.1);
+}
+
+.border-glow {
+  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 8px var(--color-accent-glow);
 }
