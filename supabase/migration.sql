@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 -- 2. SAVED_ADS TABLE
--- -----------------------------------------------
+-------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.saved_ads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
