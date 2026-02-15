@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { RefreshCw, Save, ArrowLeft, Zap, AlertTriangle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { RefreshCw, Save, ArrowLeft, Zap, AlertTriangle, Check, Archive } from 'lucide-react';
 import CopyButton from '@/components/ui/CopyButton';
+import { saveAd, incrementGenerationCount } from '@/lib/db';
 
 interface OutputBlock {
     type: string;
@@ -19,7 +21,9 @@ interface GenerationResult {
     blocks: OutputBlock[];
     input?: {
         productName: string;
+        targetAudience: string;
         platform: string;
+        offer?: string;
         tone: string;
         goal: string;
     };
@@ -28,9 +32,11 @@ interface GenerationResult {
 }
 
 export default function ResultDisplay() {
+    const router = useRouter();
     const [result, setResult] = useState<GenerationResult | null>(null);
     const [savedBlocks, setSavedBlocks] = useState<Set<number>>(new Set());
     const [hasData, setHasData] = useState<boolean | null>(null);
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
     useEffect(() => {
         const storedResult = sessionStorage.getItem('ezzads_result');
@@ -43,13 +49,48 @@ export default function ResultDisplay() {
             }
             setResult(parsed);
             setHasData(true);
+
+            // Track the generation in the user's profile
+            incrementGenerationCount().catch(() => { });
         } else {
             setHasData(false);
         }
     }, []);
 
-    const handleSave = (index: number) => {
+    const handleSaveBlock = (index: number) => {
         setSavedBlocks((prev) => new Set([...prev, index]));
+    };
+
+    const handleSaveToArchive = async () => {
+        if (!result || !result.input || saveStatus === 'saving' || saveStatus === 'saved') return;
+
+        setSaveStatus('saving');
+
+        const saved = await saveAd({
+            platform: result.input.platform,
+            tone: result.input.tone,
+            goal: result.input.goal,
+            product_name: result.input.productName,
+            target_audience: result.input.targetAudience,
+            offer: result.input.offer,
+            output_data: {
+                blocks: result.blocks,
+                frameworkUsed: result.frameworkUsed,
+                performanceRating: result.performanceRating,
+            },
+            framework_used: result.frameworkUsed,
+            performance_rating: result.performanceRating,
+            generation_id: result.id,
+            tokens_used: result.tokensUsed,
+        });
+
+        if (saved) {
+            setSaveStatus('saved');
+        } else {
+            setSaveStatus('error');
+            // Reset error after 3s
+            setTimeout(() => setSaveStatus('idle'), 3000);
+        }
     };
 
     // No data state
@@ -170,7 +211,7 @@ export default function ResultDisplay() {
                             <div className="flex items-center gap-2">
                                 <CopyButton text={block.items.join('\n\n')} label="COPY_ALL" />
                                 <button
-                                    onClick={() => handleSave(blockIndex)}
+                                    onClick={() => handleSaveBlock(blockIndex)}
                                     className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] tracking-wider transition-all duration-100"
                                     style={{
                                         fontFamily: 'var(--font-mono)',
@@ -231,12 +272,55 @@ export default function ResultDisplay() {
                 <div className="flex items-center gap-3">
                     <Link href="/generate" className="btn-void">
                         <RefreshCw size={14} />
-                        REGENERATE_VARIANTS
+                        REGENERATE
                     </Link>
-                    <button className="btn-signal">
-                        <Save size={14} />
-                        SAVE_TO_ARCHIVE
+
+                    {/* Save to Archive — real Supabase */}
+                    <button
+                        onClick={handleSaveToArchive}
+                        disabled={saveStatus === 'saving' || saveStatus === 'saved'}
+                        className={saveStatus === 'saved' ? 'btn-void' : 'btn-signal'}
+                        style={
+                            saveStatus === 'saved'
+                                ? { color: 'var(--color-accent-success)', borderColor: 'var(--color-accent-success)' }
+                                : saveStatus === 'error'
+                                    ? { color: 'var(--color-accent-danger)', borderColor: 'rgba(239,68,68,0.3)' }
+                                    : {}
+                        }
+                    >
+                        {saveStatus === 'saving' && (
+                            <>
+                                <span className="inline-block w-3 h-3 border border-current border-t-transparent animate-spin" style={{ borderRadius: '50%' }} />
+                                ARCHIVING...
+                            </>
+                        )}
+                        {saveStatus === 'saved' && (
+                            <>
+                                <Check size={14} />
+                                ARCHIVED
+                                <Archive size={14} />
+                            </>
+                        )}
+                        {saveStatus === 'error' && (
+                            <>
+                                <AlertTriangle size={14} />
+                                ARCHIVE_FAILED
+                            </>
+                        )}
+                        {saveStatus === 'idle' && (
+                            <>
+                                <Save size={14} />
+                                SAVE_TO_ARCHIVE
+                            </>
+                        )}
                     </button>
+
+                    {saveStatus === 'saved' && (
+                        <Link href="/dashboard" className="btn-signal">
+                            <Archive size={14} />
+                            VIEW_ARCHIVE
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>
