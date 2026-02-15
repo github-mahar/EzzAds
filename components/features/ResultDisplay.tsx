@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Copy, RefreshCw, Save, ArrowLeft, Zap } from 'lucide-react';
+import { RefreshCw, Save, ArrowLeft, Zap, AlertTriangle } from 'lucide-react';
 import CopyButton from '@/components/ui/CopyButton';
-import type { AdGenerationInput } from '@/types';
 
 interface OutputBlock {
     type: string;
@@ -12,63 +11,40 @@ interface OutputBlock {
     items: string[];
 }
 
-// Demo output — will be replaced with actual API response
-const DEMO_OUTPUT: OutputBlock[] = [
-    {
-        type: 'HEADLINE',
-        label: 'HEADLINE_VARIANTS',
-        items: [
-            'Stop Burning Ad Spend on Copy That Doesn\'t Convert',
-            'Your Competitors Use AI to Write Ads. You Should Too.',
-            'The Ad Copy Engine That Outperforms Your Best Copywriter',
-        ],
-    },
-    {
-        type: 'HOOK',
-        label: 'HOOK_VARIANTS',
-        items: [
-            '93% of Facebook ads fail in the first 3 seconds. Here\'s how the top 7% win.',
-            'You\'re not losing to better products. You\'re losing to better copy.',
-            'What if every ad you wrote was engineered to convert — not just written to fill space?',
-        ],
-    },
-    {
-        type: 'PRIMARY_TEXT',
-        label: 'PRIMARY_TEXT_VARIANTS',
-        items: [
-            'Most businesses treat ad copy like an afterthought. They write something "good enough," launch it, and hope for the best.\n\nBut hope doesn\'t scale.\n\nEzzAds uses proven psychological frameworks — AIDA, PAS, and emotional triggers — to generate ad copy that\'s engineered for conversion. Not generic. Not templated. Precision-crafted for your audience, your platform, and your offer.\n\nOne prompt. Six optimized output blocks. Deploy in seconds.',
-            'Your ad copy is the most expensive real estate in your business. Every word either converts or costs you money.\n\nEzzAds analyzes your product, audience, and platform to generate high-converting ad copy that speaks directly to your customer\'s pain points, desires, and decision triggers.\n\nStop guessing. Start converting.',
-        ],
-    },
-    {
-        type: 'CTA',
-        label: 'CTA_SUGGESTION',
-        items: ['Generate Your First Ad Free →'],
-    },
-    {
-        type: 'CREATIVE_DIRECTION',
-        label: 'CREATIVE_DIRECTION',
-        items: [
-            'Visual: Dark, high-contrast split screen. Left side: cluttered generic ad mockup (faded/struck through). Right side: clean, structured EzzAds output glowing with blue accent. Typography-driven, no stock photos. Use monospace font overlay for "data processing" feel. Format: 1:1 for Meta/Instagram, 16:9 for YouTube.',
-        ],
-    },
-    {
-        type: 'VIDEO_SCRIPT',
-        label: 'VIDEO_SCRIPT_15S',
-        items: [
-            '[0-3s] HOOK: "Your ad copy is costing you thousands."\n[3-7s] PROBLEM: Quick montage of generic, underperforming ads.\n[7-12s] SOLUTION: EzzAds interface generating copy in real-time.\n[12-15s] CTA: "Generate your first ad free. EzzAds.ai"',
-        ],
-    },
-];
+interface GenerationResult {
+    id: string;
+    platform: string;
+    performanceRating: string;
+    frameworkUsed: string;
+    blocks: OutputBlock[];
+    input?: {
+        productName: string;
+        platform: string;
+        tone: string;
+        goal: string;
+    };
+    generatedAt: string;
+    tokensUsed?: number;
+}
 
 export default function ResultDisplay() {
-    const [inputData, setInputData] = useState<AdGenerationInput | null>(null);
+    const [result, setResult] = useState<GenerationResult | null>(null);
     const [savedBlocks, setSavedBlocks] = useState<Set<number>>(new Set());
+    const [hasData, setHasData] = useState<boolean | null>(null);
 
     useEffect(() => {
-        const stored = sessionStorage.getItem('ezzads_input');
-        if (stored) {
-            setInputData(JSON.parse(stored));
+        const storedResult = sessionStorage.getItem('ezzads_result');
+        const storedInput = sessionStorage.getItem('ezzads_input');
+
+        if (storedResult) {
+            const parsed = JSON.parse(storedResult);
+            if (storedInput) {
+                parsed.input = JSON.parse(storedInput);
+            }
+            setResult(parsed);
+            setHasData(true);
+        } else {
+            setHasData(false);
         }
     }, []);
 
@@ -76,20 +52,46 @@ export default function ResultDisplay() {
         setSavedBlocks((prev) => new Set([...prev, index]));
     };
 
+    // No data state
+    if (hasData === false) {
+        return (
+            <div className="card-void p-12 text-center flex flex-col items-center gap-4 animate-boot">
+                <AlertTriangle size={32} style={{ color: 'var(--color-text-muted)' }} />
+                <span className="mono-header text-xs">[NO_GENERATION_DATA]</span>
+                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    No generation output found. Initialize a new generation to view results.
+                </p>
+                <Link href="/generate" className="btn-signal">
+                    <Zap size={14} />
+                    INITIALIZE_GENERATION
+                </Link>
+            </div>
+        );
+    }
+
+    // Loading state
+    if (hasData === null || !result) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="processing-bar w-48" />
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-6 animate-boot-delay-1">
             {/* Input Summary Bar */}
-            {inputData && (
+            {result.input && (
                 <div
                     className="card-void p-4 flex flex-wrap items-center gap-4"
                     style={{ borderColor: 'rgba(37, 99, 235, 0.15)' }}
                 >
                     <span className="mono-label text-[10px]">INPUT_SUMMARY:</span>
                     {[
-                        { label: 'PRODUCT', value: inputData.productName },
-                        { label: 'PLATFORM', value: inputData.platform },
-                        { label: 'TONE', value: inputData.tone },
-                        { label: 'GOAL', value: inputData.goal },
+                        { label: 'PRODUCT', value: result.input.productName },
+                        { label: 'PLATFORM', value: result.input.platform },
+                        { label: 'TONE', value: result.input.tone },
+                        { label: 'GOAL', value: result.input.goal },
                     ].map((item) => (
                         <div key={item.label} className="flex items-center gap-2">
                             <span className="mono-label text-[9px]">{item.label}:</span>
@@ -107,22 +109,45 @@ export default function ResultDisplay() {
                             </span>
                         </div>
                     ))}
-                    <div className="ml-auto flex items-center gap-2">
-                        <span className="status-pulse" />
-                        <span
-                            className="text-[10px] font-semibold"
-                            style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent-success)' }}
-                        >
-                            CTR_RATING: OPTIMAL
-                        </span>
+                    <div className="ml-auto flex items-center gap-4">
+                        {result.tokensUsed && result.tokensUsed > 0 && (
+                            <span className="mono-label text-[9px]">TOKENS: {result.tokensUsed}</span>
+                        )}
+                        <div className="flex items-center gap-2">
+                            <span className="status-pulse" />
+                            <span
+                                className="text-[10px] font-semibold"
+                                style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent-success)' }}
+                            >
+                                CTR_RATING: {result.performanceRating}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
 
+            {/* Framework Tag */}
+            <div className="flex items-center gap-3">
+                <span className="mono-label text-[10px]">FRAMEWORK_APPLIED:</span>
+                <span
+                    className="text-[10px] px-2 py-0.5 font-semibold"
+                    style={{
+                        fontFamily: 'var(--font-mono)',
+                        color: 'var(--color-accent-blue)',
+                        background: 'rgba(37, 99, 235, 0.08)',
+                        border: '1px solid rgba(37, 99, 235, 0.2)',
+                        borderRadius: 'var(--radius-sharp)',
+                    }}
+                >
+                    [{result.frameworkUsed}]
+                </span>
+                <span className="mono-label text-[10px]">ID: {result.id}</span>
+            </div>
+
             {/* Output Blocks */}
             <div className="grid grid-cols-1 gap-4">
-                {DEMO_OUTPUT.map((block, blockIndex) => (
-                    <div key={block.type} className="card-void overflow-hidden">
+                {result.blocks.map((block, blockIndex) => (
+                    <div key={block.type + blockIndex} className="card-void overflow-hidden">
                         {/* Block Header */}
                         <div
                             className="flex items-center justify-between px-5 py-3"
@@ -204,10 +229,10 @@ export default function ResultDisplay() {
                     NEW_GENERATION
                 </Link>
                 <div className="flex items-center gap-3">
-                    <button className="btn-void">
+                    <Link href="/generate" className="btn-void">
                         <RefreshCw size={14} />
                         REGENERATE_VARIANTS
-                    </button>
+                    </Link>
                     <button className="btn-signal">
                         <Save size={14} />
                         SAVE_TO_ARCHIVE

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Zap, ArrowRight } from 'lucide-react';
+import { Zap, ArrowRight, AlertTriangle } from 'lucide-react';
 import SegmentedToggle from '@/components/ui/SegmentedToggle';
 import ProcessingOverlay from '@/components/ui/ProcessingOverlay';
 import type { AdPlatform, AdTone, AdGoal } from '@/types';
@@ -32,6 +32,8 @@ const GOAL_OPTIONS: { value: AdGoal; label: string }[] = [
 export default function GeneratorEngine() {
     const router = useRouter();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [apiError, setApiError] = useState<string | null>(null);
+    const [apiCalled, setApiCalled] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
         targetAudience: '',
@@ -50,22 +52,74 @@ export default function GeneratorEngine() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         if (!validate()) return;
+        setApiError(null);
         setIsProcessing(true);
+        setApiCalled(false);
+
+        try {
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                setIsProcessing(false);
+                setApiError(result.message || result.error || 'Generation failed. Please retry.');
+                return;
+            }
+
+            // Store the full result in sessionStorage for the result page
+            sessionStorage.setItem('ezzads_result', JSON.stringify(result.data));
+            sessionStorage.setItem('ezzads_input', JSON.stringify(formData));
+            setApiCalled(true);
+        } catch {
+            setIsProcessing(false);
+            setApiError('Network error. Check your connection and retry.');
+        }
     };
 
     const handleProcessingComplete = useCallback(() => {
-        // Store form data in sessionStorage for the result page
-        sessionStorage.setItem('ezzads_input', JSON.stringify(formData));
-        setTimeout(() => {
+        if (apiCalled) {
             router.push('/result');
-        }, 500);
-    }, [formData, router]);
+        }
+    }, [apiCalled, router]);
+
+    // Show processing overlay only after API has responded successfully
+    const showOverlay = isProcessing && apiCalled;
 
     return (
         <>
-            <ProcessingOverlay isActive={isProcessing} onComplete={handleProcessingComplete} />
+            <ProcessingOverlay isActive={showOverlay} onComplete={handleProcessingComplete} />
+
+            {/* API Error Banner */}
+            {apiError && (
+                <div
+                    className="mb-6 p-4 flex items-start gap-3 animate-boot"
+                    style={{
+                        background: 'rgba(239, 68, 68, 0.06)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        borderRadius: 'var(--radius-default)',
+                    }}
+                >
+                    <AlertTriangle size={16} style={{ color: 'var(--color-accent-danger)', flexShrink: 0, marginTop: 2 }} />
+                    <div className="flex flex-col gap-1">
+                        <span
+                            className="text-xs font-semibold"
+                            style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent-danger)' }}
+                        >
+                            [ENGINE_ERROR]
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                            {apiError}
+                        </span>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-boot-delay-1">
                 {/* Main Form */}
@@ -169,9 +223,18 @@ export default function GeneratorEngine() {
                                 disabled={isProcessing}
                                 className="btn-signal glow-signal"
                             >
-                                <Zap size={14} />
-                                GENERATE_AD
-                                <ArrowRight size={14} />
+                                {isProcessing && !apiCalled ? (
+                                    <>
+                                        <span className="inline-block w-3 h-3 border border-white border-t-transparent animate-spin" style={{ borderRadius: '50%' }} />
+                                        COMPUTING...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Zap size={14} />
+                                        GENERATE_AD
+                                        <ArrowRight size={14} />
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -184,9 +247,10 @@ export default function GeneratorEngine() {
                         <span className="mono-header text-xs">[SYSTEM_STATUS]</span>
                         <div className="flex flex-col gap-3">
                             {[
-                                { label: 'ENGINE', value: 'GPT-4o', status: 'ACTIVE' },
+                                { label: 'ENGINE', value: 'GPT-4o-mini', status: 'ACTIVE' },
                                 { label: 'FRAMEWORK', value: 'AUTO', status: 'READY' },
                                 { label: 'RATE_LIMIT', value: '5/day', status: 'FREE_TIER' },
+                                { label: 'API_STATUS', value: isProcessing ? 'PROCESSING' : 'IDLE', status: isProcessing ? 'BUSY' : 'READY' },
                             ].map((item) => (
                                 <div
                                     key={item.label}
@@ -198,7 +262,14 @@ export default function GeneratorEngine() {
                                     }}
                                 >
                                     <span className="mono-label text-[10px]">{item.label}</span>
-                                    <span className="mono-data text-xs">{item.value}</span>
+                                    <span
+                                        className="mono-data text-xs"
+                                        style={{
+                                            color: item.status === 'BUSY' ? 'var(--color-accent-warning)' : undefined,
+                                        }}
+                                    >
+                                        {item.value}
+                                    </span>
                                 </div>
                             ))}
                         </div>
@@ -224,6 +295,29 @@ export default function GeneratorEngine() {
                                 </div>
                             )
                         )}
+                    </div>
+
+                    {/* Output Preview */}
+                    <div className="card-void p-5 flex flex-col gap-3">
+                        <span className="mono-header text-xs">[OUTPUT_MANIFEST]</span>
+                        <div className="flex flex-col gap-1">
+                            {[
+                                '→ 3x Headline variants',
+                                '→ 3x Hook variations',
+                                '→ 2x Primary text blocks',
+                                '→ 1x CTA suggestion',
+                                '→ 1x Creative direction',
+                                '→ 1x Video script (15s)',
+                            ].map((item) => (
+                                <span
+                                    key={item}
+                                    className="text-[10px]"
+                                    style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}
+                                >
+                                    {item}
+                                </span>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
