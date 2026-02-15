@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import AuthForm from '@/components/features/AuthForm';
 import type { Metadata } from 'next';
 
@@ -21,7 +22,13 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <AuthForm />
+                <Suspense fallback={
+                    <div className="card-void p-8 flex items-center justify-center">
+                        <div className="processing-bar w-32" />
+                    </div>
+                }>
+                    <AuthForm />
+                </Suspense>
             </div>
         </div>
     );
