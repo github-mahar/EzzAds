@@ -5,24 +5,34 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User, Zap, ArrowRight, LogOut, Shield } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
+import { getUsageStats, getProfile } from '@/lib/db';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import type { Profile } from '@/lib/db';
 
 export default function AccountPanel() {
     const router = useRouter();
     const [user, setUser] = useState<SupabaseUser | null>(null);
+    const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
-
-    // Demo usage data — will connect to Supabase tables
-    const generationsUsedToday = 2;
-    const generationsLimit = 5;
-    const totalGenerations = 47;
-    const planType = 'FREE';
-    const usagePercent = (generationsUsedToday / generationsLimit) * 100;
+    const [usageData, setUsageData] = useState<{
+        usedToday: number;
+        limit: number;
+        total: number;
+        planType: string;
+    } | null>(null);
 
     useEffect(() => {
         const supabase = createClient();
-        supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+        supabase.auth.getUser().then(async ({ data: { user: currentUser } }) => {
             setUser(currentUser);
+            if (currentUser) {
+                const [profileData, usage] = await Promise.all([
+                    getProfile(),
+                    getUsageStats(),
+                ]);
+                setProfile(profileData);
+                setUsageData(usage);
+            }
             setLoading(false);
         });
     }, []);
@@ -50,13 +60,21 @@ export default function AccountPanel() {
                 <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
                     No active session detected. Authenticate to access system configuration.
                 </p>
-                <Link href="/login" className="btn-signal">
+                <Link href="/login?redirect=/account" className="btn-signal">
                     <Zap size={14} />
                     AUTHENTICATE
                 </Link>
             </div>
         );
     }
+
+    const generationsUsedToday = usageData?.usedToday ?? 0;
+    const generationsLimit = usageData?.limit === -1 ? '∞' : (usageData?.limit ?? 5);
+    const totalGenerations = usageData?.total ?? 0;
+    const planType = usageData?.planType ?? 'FREE';
+    const usagePercent = typeof generationsLimit === 'number'
+        ? (generationsUsedToday / generationsLimit) * 100
+        : 10;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-boot-delay-1">
@@ -106,7 +124,7 @@ export default function AccountPanel() {
                                 { label: 'EMAIL', value: user.email ?? 'N/A' },
                                 { label: 'PLAN_TYPE', value: planType },
                                 { label: 'TOTAL_GENERATIONS', value: totalGenerations.toString() },
-                                { label: 'ACCOUNT_STATUS', value: 'ACTIVE' },
+                                { label: 'ACCOUNT_STATUS', value: profile ? 'ACTIVE' : 'PENDING_SYNC' },
                                 { label: 'USER_ID', value: user.id.slice(0, 12) + '...' },
                                 { label: 'AUTH_PROVIDER', value: user.app_metadata?.provider?.toUpperCase() ?? 'EMAIL' },
                             ].map((field) => (
@@ -158,7 +176,7 @@ export default function AccountPanel() {
                                 <div
                                     className="h-full transition-all duration-300"
                                     style={{
-                                        width: `${usagePercent}%`,
+                                        width: `${Math.min(usagePercent, 100)}%`,
                                         background: usagePercent > 80 ? 'var(--color-accent-danger)' : 'var(--color-accent-blue)',
                                         boxShadow: `0 0 10px ${usagePercent > 80 ? 'rgba(239, 68, 68, 0.3)' : 'var(--color-accent-glow)'}`,
                                     }}
@@ -169,8 +187,25 @@ export default function AccountPanel() {
                         <div className="flex items-center gap-2">
                             <span className="status-pulse" />
                             <span className="mono-label text-[10px]" style={{ color: 'var(--color-accent-success)' }}>
-                                {generationsLimit - generationsUsedToday} GENERATIONS REMAINING
+                                {typeof generationsLimit === 'number'
+                                    ? `${generationsLimit - generationsUsedToday} GENERATIONS REMAINING`
+                                    : 'UNLIMITED GENERATIONS'}
                             </span>
+                        </div>
+
+                        <div className="flex items-center gap-4 pt-2" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+                            <div className="flex flex-col gap-0.5">
+                                <span className="mono-label text-[9px]">LIFETIME_TOTAL</span>
+                                <span className="mono-data text-lg font-bold">{totalGenerations}</span>
+                            </div>
+                            {profile?.last_generation_date && (
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="mono-label text-[9px]">LAST_ACTIVE</span>
+                                    <span className="mono-data text-xs">
+                                        {new Date(profile.last_generation_date).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -184,17 +219,21 @@ export default function AccountPanel() {
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col gap-1">
                             <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-mono)' }}>
-                                RECON_TIER
+                                {planType === 'PRO' ? 'OPERATOR_TIER' : 'RECON_TIER'}
                             </span>
-                            <span className="mono-label text-[10px]">$0 / MONTH</span>
+                            <span className="mono-label text-[10px]">
+                                {planType === 'PRO' ? '$29 / MONTH' : '$0 / MONTH'}
+                            </span>
                         </div>
-                        <Shield size={24} style={{ color: 'var(--color-text-muted)' }} />
+                        <Shield size={24} style={{ color: planType === 'PRO' ? 'var(--color-accent-blue)' : 'var(--color-text-muted)' }} />
                     </div>
-                    <Link href="/pricing" className="btn-signal w-full justify-center">
-                        <Zap size={14} />
-                        UPGRADE_TIER
-                        <ArrowRight size={14} />
-                    </Link>
+                    {planType !== 'PRO' && (
+                        <Link href="/pricing" className="btn-signal w-full justify-center">
+                            <Zap size={14} />
+                            UPGRADE_TIER
+                            <ArrowRight size={14} />
+                        </Link>
+                    )}
                 </div>
 
                 {/* Quick Actions */}
